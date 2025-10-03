@@ -1,5 +1,15 @@
 package com.complefit.CompleFit.auth.service;
 
+import com.complefit.CompleFit.auth.domain.AuthToken;
+import com.complefit.CompleFit.auth.repository.AuthTokenRepository;
+import com.complefit.CompleFit.user.domain.User;
+import com.complefit.CompleFit.user.repository.UserRepository;
+import lombok.Value;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 @Service
 public class AuthService {
 
@@ -10,17 +20,16 @@ public class AuthService {
     private String jwtSecret;
 
     @Value("${app.jwt.expiration}")
-    private Long jwtExpiration; // em ms
+    private Long jwtExpiration;
 
     @Value("${app.jwt.refresh-expiration}")
-    private Long refreshExpiration; // em minutos ou ms
+    private Long refreshExpiration;
 
     public AuthService(AuthTokenRepository authTokenRepository, UserRepository userRepository) {
         this.authTokenRepository = authTokenRepository;
         this.userRepository = userRepository;
     }
 
-    // Gerar Access Token
     private String generateAccessToken(User user) {
         return Jwts.builder()
                 .setSubject(user.getId().toString())
@@ -40,14 +49,12 @@ public class AuthService {
 
         User user = userOpt.get();
 
-        // ⚠️ Aqui falta a parte de verificar hash da senha (BCrypt, por exemplo)
         if (!password.equals(user.getPasswordHash())) {
             throw new RuntimeException("Invalid credentials");
         }
 
         String accessToken = generateAccessToken(user);
 
-        // Cria refresh token
         String refreshToken = UUID.randomUUID().toString();
         AuthToken authToken = new AuthToken();
         authToken.setRefreshToken(refreshToken);
@@ -75,7 +82,6 @@ public class AuthService {
         return new AuthResponse(newAccessToken, refreshToken);
     }
 
-    // Logout → deleta refresh token
     public void logout(String refreshToken) {
         authTokenRepository.deleteByRefreshToken(refreshToken);
     }
