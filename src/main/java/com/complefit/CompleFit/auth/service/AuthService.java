@@ -8,6 +8,8 @@ import lombok.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -38,8 +40,7 @@ public class AuthService {
                 .signWith(SignatureAlgorithm.HS256, jwtSecret)
                 .compact();
     }
-
-    // Login → gera tokens
+    
     public AuthResponse login(String email, String password) {
         Optional<User> userOpt = userRepository.findByEmail(email);
 
