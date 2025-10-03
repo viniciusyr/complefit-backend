@@ -22,7 +22,7 @@ public class Trainer {
     private UUID id;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @JoinColumn(name = "tb_user_id", nullable = false, unique = true)
     private User user;
 
     @Column(nullable = false, unique = true, length = 20)

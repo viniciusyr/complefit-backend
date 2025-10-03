@@ -44,6 +44,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
+
     @Timestamp
     private Instant createdAt;
 
