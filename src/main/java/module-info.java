@@ -9,4 +9,6 @@ module CompleFit {
     requires jakarta.validation;
     requires jdk.jfr;
     requires spring.security.crypto;
+    requires com.fasterxml.jackson.annotation;
+    requires org.apache.tomcat.embed.core;
 }
