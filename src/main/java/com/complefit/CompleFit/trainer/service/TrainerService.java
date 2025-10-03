@@ -4,6 +4,7 @@ import com.complefit.CompleFit.trainer.domain.Trainer;
 import com.complefit.CompleFit.trainer.dto.TrainerRequestDTO;
 import com.complefit.CompleFit.trainer.dto.TrainerResponseDTO;
 import com.complefit.CompleFit.trainer.dto.TrainerUpdateDTO;
+import com.complefit.CompleFit.trainer.exception.TrainerException;
 import com.complefit.CompleFit.trainer.mapper.TrainerMapper;
 import com.complefit.CompleFit.trainer.repository.TrainerRepository;
 import com.complefit.CompleFit.user.domain.User;
@@ -27,10 +28,10 @@ public class TrainerService {
 
     public TrainerResponseDTO createTrainer(TrainerRequestDTO dto) {
         User user = userRepository.findById(dto.userId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> TrainerException.notFound(dto.userId()));
 
         if (trainerRepository.existsByCref(dto.cref())) {
-            throw new RuntimeException("CREF already registered");
+            throw TrainerException.crefAlreadyExists(dto.cref());
         }
 
         Trainer trainer = TrainerMapper.toEntity(dto, user);
@@ -39,7 +40,7 @@ public class TrainerService {
 
     public TrainerResponseDTO getTrainerById(UUID id) {
         Trainer trainer = trainerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Trainer not found"));
+                .orElseThrow(() -> TrainerException.notFound(id));
         return TrainerMapper.toResponse(trainer);
     }
 
@@ -51,7 +52,7 @@ public class TrainerService {
 
     public TrainerResponseDTO updateTrainer(UUID id, TrainerUpdateDTO dto) {
         Trainer trainer = trainerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Trainer not found"));
+                .orElseThrow(() -> TrainerException.notFound(id));
 
         TrainerMapper.updateEntity(trainer, dto);
         return TrainerMapper.toResponse(trainerRepository.save(trainer));
@@ -59,7 +60,7 @@ public class TrainerService {
 
     public void deleteTrainer(UUID id) {
         if (!trainerRepository.existsById(id)) {
-            throw new RuntimeException("Trainer not found");
+            throw TrainerException.notFound(id);
         }
         trainerRepository.deleteById(id);
     }

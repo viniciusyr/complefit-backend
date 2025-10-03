@@ -3,6 +3,7 @@ package com.complefit.CompleFit.user.service;
 import com.complefit.CompleFit.user.domain.User;
 import com.complefit.CompleFit.user.domain.UserRole;
 import com.complefit.CompleFit.user.repository.UserRepository;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
