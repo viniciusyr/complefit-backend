@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(schema = "auth_users")
+@Table(schema = "tb_auth_users")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
