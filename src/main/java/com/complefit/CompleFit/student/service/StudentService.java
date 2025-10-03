@@ -4,6 +4,7 @@ import com.complefit.CompleFit.student.domain.Student;
 import com.complefit.CompleFit.student.dto.StudentRequestDTO;
 import com.complefit.CompleFit.student.dto.StudentResponseDTO;
 import com.complefit.CompleFit.student.dto.StudentUpdateDTO;
+import com.complefit.CompleFit.student.exception.StudentException;
 import com.complefit.CompleFit.student.mapper.StudentMapper;
 import com.complefit.CompleFit.student.repository.StudentRepository;
 import com.complefit.CompleFit.user.domain.User;
@@ -27,7 +28,7 @@ public class StudentService {
 
     public StudentResponseDTO createStudent(StudentRequestDTO dto) {
         User user = userRepository.findById(dto.userId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> StudentException.notFound(dto.userId()));
 
         Student student = StudentMapper.toEntity(dto, user);
         return StudentMapper.toResponse(studentRepository.save(student));
@@ -35,7 +36,7 @@ public class StudentService {
 
     public StudentResponseDTO getStudentById(UUID id) {
         Student student = studentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+                .orElseThrow(() -> StudentException.notFound(id));
         return StudentMapper.toResponse(student);
     }
 
@@ -47,7 +48,7 @@ public class StudentService {
 
     public StudentResponseDTO updateStudent(UUID id, StudentUpdateDTO dto) {
         Student student = studentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+                .orElseThrow(() -> StudentException.notFound(id));
 
         StudentMapper.updateEntity(student, dto);
         return StudentMapper.toResponse(studentRepository.save(student));
@@ -55,7 +56,7 @@ public class StudentService {
 
     public void deleteStudent(UUID id) {
         if (!studentRepository.existsById(id)) {
-            throw new RuntimeException("Student not found");
+            throw StudentException.notFound(id);
         }
         studentRepository.deleteById(id);
     }
