@@ -5,4 +5,8 @@ module CompleFit {
     requires static lombok;
     requires spring.data.jpa;
     requires spring.web;
+    requires spring.context;
+    requires jakarta.validation;
+    requires jdk.jfr;
+    requires spring.security.crypto;
 }
