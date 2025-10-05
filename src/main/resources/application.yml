@@ -1,0 +1,30 @@
+spring:
+  profiles:
+    active: local
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          lob:
+            non_contextual_creation: true
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: false
+
+
+
+api:
+  security:
+    token:
+      secret: ${JWT_SECRET}
+      expiration-hours: 2
+    jwt:
+      secret:
+      expiration:
+      refresh-expiration:
