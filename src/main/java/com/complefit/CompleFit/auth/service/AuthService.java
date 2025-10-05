@@ -1,88 +1,90 @@
 package com.complefit.CompleFit.auth.service;
 
 import com.complefit.CompleFit.auth.domain.AuthToken;
+import com.complefit.CompleFit.auth.dto.AuthResponseDTO;
+import com.complefit.CompleFit.auth.exception.AuthException;
 import com.complefit.CompleFit.auth.repository.AuthTokenRepository;
 import com.complefit.CompleFit.user.domain.User;
 import com.complefit.CompleFit.user.repository.UserRepository;
-import lombok.Value;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
 public class AuthService {
 
-    private final AuthTokenRepository authTokenRepository;
+    private final TokenService tokenService;
     private final UserRepository userRepository;
+    private final AuthTokenRepository authTokenRepository;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    @Value("${app.jwt.secret}")
-    private String jwtSecret;
-
-    @Value("${app.jwt.expiration}")
-    private Long jwtExpiration;
-
-    @Value("${app.jwt.refresh-expiration}")
-    private Long refreshExpiration;
-
-    public AuthService(AuthTokenRepository authTokenRepository, UserRepository userRepository) {
-        this.authTokenRepository = authTokenRepository;
+    public AuthService(TokenService tokenService,
+                       UserRepository userRepository,
+                       AuthTokenRepository authTokenRepository) {
+        this.tokenService = tokenService;
         this.userRepository = userRepository;
+        this.authTokenRepository = authTokenRepository;
     }
 
-    private String generateAccessToken(User user) {
-        return Jwts.builder()
-                .setSubject(user.getId().toString())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                .signWith(SignatureAlgorithm.HS256, jwtSecret)
-                .compact();
-    }
+    public AuthResponseDTO login(String email, String password) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(AuthException::invalidCredentials);
 
-    // Login → gera tokens
-    public AuthResponse login(String email, String password) {
-        Optional<User> userOpt = userRepository.findByEmail(email);
-
-        if (userOpt.isEmpty()) {
-            throw new RuntimeException("Invalid credentials");
+        if (!passwordEncoder.matches(password, user.getPasswordHash())) {
+            throw AuthException.invalidCredentials();
         }
 
-        User user = userOpt.get();
-
-        if (!password.equals(user.getPasswordHash())) {
-            throw new RuntimeException("Invalid credentials");
+        if (!user.isEnabled()) {
+            throw AuthException.accountDisabled();
         }
 
-        String accessToken = generateAccessToken(user);
+        String accessToken;
+        try {
+            accessToken = tokenService.generateToken(user);
+        } catch (Exception e) {
+            throw AuthException.tokenGenerationException(null);
+        }
 
         String refreshToken = UUID.randomUUID().toString();
+
         AuthToken authToken = new AuthToken();
-        authToken.setRefreshToken(refreshToken);
         authToken.setUserId(user.getId());
-        authToken.setExpiryDate(LocalDateTime.now().plusMinutes(refreshExpiration));
+        authToken.setRefreshToken(refreshToken);
+        authToken.setExpiryDate(LocalDateTime.now().plusDays(7));
+
         authTokenRepository.save(authToken);
 
-        return new AuthResponse(accessToken, refreshToken);
+        return new AuthResponseDTO(accessToken, refreshToken);
     }
 
-    // Refresh Token
-    public AuthResponse refresh(String refreshToken) {
+    public AuthResponseDTO refresh(String refreshToken) {
         AuthToken token = authTokenRepository.findByRefreshToken(refreshToken)
-                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+                .orElseThrow(AuthException::invalidRefreshToken);
 
         if (token.getExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Refresh token expired");
+            throw AuthException.refreshTokenExpired();
         }
 
         User user = userRepository.findById(token.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> AuthException.userNotFound("unknown"));
 
-        String newAccessToken = generateAccessToken(user);
+        String newAccessToken;
+        try {
+            newAccessToken = tokenService.generateToken(user);
+        } catch (Exception e) {
+            throw AuthException.tokenGenerationException(null);
+        }
 
-        return new AuthResponse(newAccessToken, refreshToken);
+        return new AuthResponseDTO(newAccessToken, refreshToken);
     }
 
+
     public void logout(String refreshToken) {
+        boolean exists = authTokenRepository.existsByRefreshToken(refreshToken);
+        if (!exists) {
+            throw AuthException.invalidRefreshToken();
+        }
         authTokenRepository.deleteByRefreshToken(refreshToken);
     }
 }

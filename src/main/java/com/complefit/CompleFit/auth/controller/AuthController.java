@@ -1,12 +1,12 @@
 package com.complefit.CompleFit.auth.controller;
 
-import com.complefit.CompleFit.auth.service.AuthResponse;
+import com.complefit.CompleFit.auth.dto.AuthRequestDTO;
+import com.complefit.CompleFit.auth.dto.AuthResponseDTO;
+import com.complefit.CompleFit.auth.dto.RefreshTokenRequestDTO;
 import com.complefit.CompleFit.auth.service.AuthService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -19,18 +19,21 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestParam String email, @RequestParam String password) {
-        return ResponseEntity.ok(authService.login(email, password));
+    public ResponseEntity<AuthResponseDTO> login(@RequestBody @Valid AuthRequestDTO request) {
+        AuthResponseDTO response = authService.login(request.email(), request.password());
+        return ResponseEntity.ok(response);
     }
 
+
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponse> refresh(@RequestParam String refreshToken) {
-        return ResponseEntity.ok(authService.refresh(refreshToken));
+    public ResponseEntity<AuthResponseDTO> refresh(@RequestBody @Valid RefreshTokenRequestDTO request) {
+        AuthResponseDTO response = authService.refresh(request.refreshToken());
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestParam String refreshToken) {
-        authService.logout(refreshToken);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Void> logout(@RequestBody @Valid RefreshTokenRequestDTO request) {
+        authService.logout(request.refreshToken());
+        return ResponseEntity.noContent().build();
     }
 }
