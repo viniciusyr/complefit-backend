@@ -1,0 +1,63 @@
+package com.complefit.complefit.student.service;
+
+import com.complefit.complefit.student.domain.Student;
+import com.complefit.complefit.student.dto.StudentRequestDTO;
+import com.complefit.complefit.student.dto.StudentResponseDTO;
+import com.complefit.complefit.student.dto.StudentUpdateDTO;
+import com.complefit.complefit.student.exception.StudentException;
+import com.complefit.complefit.student.mapper.StudentMapper;
+import com.complefit.complefit.student.repository.StudentRepository;
+import com.complefit.complefit.user.domain.User;
+import com.complefit.complefit.user.repository.UserRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@Service
+public class StudentService {
+
+    private final StudentRepository studentRepository;
+    private final UserRepository userRepository;
+
+    public StudentService(StudentRepository studentRepository, UserRepository userRepository) {
+        this.studentRepository = studentRepository;
+        this.userRepository = userRepository;
+    }
+
+    public StudentResponseDTO createStudent(StudentRequestDTO dto) {
+        User user = userRepository.findById(dto.userId())
+                .orElseThrow(() -> StudentException.notFound(dto.userId()));
+
+        Student student = StudentMapper.toEntity(dto, user);
+        return StudentMapper.toResponse(studentRepository.save(student));
+    }
+
+    public StudentResponseDTO getStudentById(UUID id) {
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() -> StudentException.notFound(id));
+        return StudentMapper.toResponse(student);
+    }
+
+    public List<StudentResponseDTO> getAllStudents() {
+        return studentRepository.findAll().stream()
+                .map(StudentMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    public StudentResponseDTO updateStudent(UUID id, StudentUpdateDTO dto) {
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() -> StudentException.notFound(id));
+
+        StudentMapper.updateEntity(student, dto);
+        return StudentMapper.toResponse(studentRepository.save(student));
+    }
+
+    public void deleteStudent(UUID id) {
+        if (!studentRepository.existsById(id)) {
+            throw StudentException.notFound(id);
+        }
+        studentRepository.deleteById(id);
+    }
+}
