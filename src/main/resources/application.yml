@@ -19,12 +19,3 @@ spring:
 
 
 
-api:
-  security:
-    token:
-      secret: ${JWT_SECRET}
-      expiration-hours: 2
-    jwt:
-      secret:
-      expiration:
-      refresh-expiration:
