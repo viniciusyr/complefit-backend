@@ -22,7 +22,6 @@ public class UserController {
         this.userService = userService;
     }
 
-    @RateLimiter(name = "register", fallbackMethod = "rateLimitFallback")
     @PostMapping("/register")
     public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserRequestDTO user) {
         UserResponseDTO userResponseDTO = userService.createUser(user);

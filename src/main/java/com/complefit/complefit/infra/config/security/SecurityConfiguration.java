@@ -1,6 +1,8 @@
 package com.complefit.complefit.infra.config.security;
 
 import com.complefit.complefit.auth.service.AuthService;
+import com.complefit.complefit.auth.service.TokenService;
+import com.complefit.complefit.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,17 +26,17 @@ import java.util.List;
 public class SecurityConfiguration {
 
     private final AuthService authService;
-    private final JwtAuthenticationFilter jwtFilter;
-    private final RateLimitFilter rateLimitFilter;
 
-    public SecurityConfiguration(AuthService authService, JwtAuthenticationFilter jwtFilter, RateLimitFilter rateLimitFilter) {
+    public SecurityConfiguration(AuthService authService) {
         this.authService = authService;
-        this.jwtFilter = jwtFilter;
-        this.rateLimitFilter = rateLimitFilter;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            JwtAuthenticationFilter jwtFilter,
+            RateLimitFilter rateLimitFilter) throws Exception {
+
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(request -> {
@@ -57,11 +59,20 @@ public class SecurityConfiguration {
                             response.getWriter().write("{\"error\": \"Unauthorized\"}");
                         })
                 )
-                .addFilterBefore(rateLimitFilter, JwtAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(rateLimitFilter, JwtAuthenticationFilter.class)
                 .build();
     }
 
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter(TokenService tokenService, UserRepository userRepository) {
+        return new JwtAuthenticationFilter(tokenService, userRepository);
+    }
+
+    @Bean
+    public RateLimitFilter rateLimitFilter() {
+        return new RateLimitFilter();
+    }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
