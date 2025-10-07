@@ -25,10 +25,12 @@ public class SecurityConfiguration {
 
     private final AuthService authService;
     private final JwtAuthenticationFilter jwtFilter;
+    private final RateLimitFilter rateLimitFilter;
 
-    public SecurityConfiguration(AuthService authService, JwtAuthenticationFilter jwtFilter) {
+    public SecurityConfiguration(AuthService authService, JwtAuthenticationFilter jwtFilter, RateLimitFilter rateLimitFilter) {
         this.authService = authService;
         this.jwtFilter = jwtFilter;
+        this.rateLimitFilter = rateLimitFilter;
     }
 
     @Bean
@@ -38,7 +40,7 @@ public class SecurityConfiguration {
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
                     config.setAllowedOrigins(List.of("http://localhost:8080"));
-                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "OPTIONS"));
                     config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
                     return config;
                 }))
@@ -55,6 +57,7 @@ public class SecurityConfiguration {
                             response.getWriter().write("{\"error\": \"Unauthorized\"}");
                         })
                 )
+                .addFilterBefore(rateLimitFilter, JwtAuthenticationFilter.class)
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
