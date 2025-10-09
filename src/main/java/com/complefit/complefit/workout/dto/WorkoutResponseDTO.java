@@ -1,6 +1,7 @@
 package com.complefit.complefit.workout.dto;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 public record WorkoutResponseDTO(

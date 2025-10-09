@@ -9,6 +9,7 @@ import com.complefit.complefit.workout.domain.WorkoutVisibility;
 import com.complefit.complefit.workout.dto.WorkoutRequestDTO;
 import com.complefit.complefit.workout.dto.WorkoutResponseDTO;
 import com.complefit.complefit.workout.dto.WorkoutUpdateRequestDTO;
+import com.complefit.complefit.workout.exception.WorkoutException;
 import com.complefit.complefit.workout.mapper.WorkoutMapper;
 import com.complefit.complefit.workout.repository.WorkoutRepository;
 import jakarta.transaction.Transactional;
@@ -49,21 +50,21 @@ public class WorkoutService {
         Workout workout = workoutMapper.toEntity(request, trainer, student);
         workoutRepository.save(workout);
 
-        return WorkoutResponseDTO.fromEntity(workout);
+        return workoutMapper.toResponse(workout);
     }
 
     @Transactional(readOnly = true)
     public WorkoutResponseDTO getById(UUID id) {
         Workout workout = workoutRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Workout not found"));
-        return WorkoutResponseDTO.fromEntity(workout);
+        return workoutMapper.toResponse(workout);
     }
 
     @Transactional(readOnly = true)
     public List<WorkoutResponseDTO> getByTrainer(UUID trainerId) {
         return workoutRepository.findByTrainerId(trainerId)
                 .stream()
-                .map(WorkoutResponseDTO::fromEntity)
+                .map(workoutMapper::toResponse)
                 .toList();
     }
 
@@ -71,7 +72,7 @@ public class WorkoutService {
     public List<WorkoutResponseDTO> getByStudent(UUID studentId) {
         return workoutRepository.findByStudentId(studentId)
                 .stream()
-                .map(WorkoutResponseDTO::fromEntity)
+                .map(workoutMapper::toResponse)
                 .toList();
     }
 
@@ -88,7 +89,7 @@ public class WorkoutService {
 
         if (request.exercises() != null && !request.exercises().isEmpty()) {
             List<WorkoutExercise> updatedExercises = request.exercises().stream()
-                    .map(dto -> new WorkoutExerciseMapper().toEntity(dto))
+                    .map(workoutExerciseMapper::toResponse)
                     .toList();
             workout.getExercises().clear();
             workout.getExercises().addAll(updatedExercises);
@@ -96,13 +97,13 @@ public class WorkoutService {
 
         workoutRepository.save(workout);
 
-        return WorkoutResponseDTO.fromEntity(workout);
+        return workoutMapper.toResponse(workout);
     }
 
     @Transactional
     public void delete(UUID id) {
         if (!workoutRepository.existsById(id)) {
-            throw new IllegalArgumentException("Workout not found");
+            throw WorkoutException.notFound(id);
         }
         workoutRepository.deleteById(id);
     }
