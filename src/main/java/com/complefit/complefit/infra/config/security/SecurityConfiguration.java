@@ -41,7 +41,7 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(List.of("http://localhost:8080"));
+                    config.setAllowedOrigins(List.of("http://localhost:8090"));
                     config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "OPTIONS"));
                     config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
                     return config;
@@ -50,6 +50,8 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users/register").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/exercises").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex
