@@ -2,8 +2,7 @@ package com.complefit.complefit.workoutexercise.domain;
 
 import com.complefit.complefit.workout.domain.Workout;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
+
 import lombok.*;
 
 import java.util.UUID;

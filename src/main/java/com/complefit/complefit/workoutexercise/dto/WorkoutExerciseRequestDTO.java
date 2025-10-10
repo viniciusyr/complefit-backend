@@ -20,12 +20,12 @@ public record WorkoutExerciseRequestDTO(
         @NotNull @Min(1)
         Integer repetitions,
 
-        @Min(0)
+        @Min(1)
         Double weight,
 
-        @Min(0)
+        @Min(1)
         Integer restTimeSeconds,
 
-        @Min(0)
+        @Min(1)
         Integer durationSeconds
 ) {}
