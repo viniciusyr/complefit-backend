@@ -1,6 +1,9 @@
 package com.complefit.complefit.workout.dto;
 
+import com.complefit.complefit.workoutexercise.dto.WorkoutExerciseResponseDTO;
+
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 public record WorkoutResponseDTO(
@@ -8,7 +11,6 @@ public record WorkoutResponseDTO(
         UUID id,
         String title,
         String description,
-        Instant dateCreated,
 
         UUID trainerId,
         String trainerName,
@@ -16,8 +18,13 @@ public record WorkoutResponseDTO(
         UUID studentId,
         String studentName,
 
-        Integer totalDurationSeconds,
         String visibility,
 
-        List<WorkoutExerciseResponseDTO> exercises
+        List<WorkoutExerciseResponseDTO> exercises,
+        Integer totalDurationSeconds,
+
+        String notes,
+
+        Instant createdAt,
+        Instant updatedAt
 ) {}

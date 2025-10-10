@@ -1,6 +1,7 @@
 package com.complefit.complefit.workout.domain;
 
 import com.complefit.complefit.user.domain.User;
+import com.complefit.complefit.workoutexercise.domain.WorkoutExercise;
 import jakarta.persistence.*;
 import jdk.jfr.Timestamp;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,7 @@ import lombok.Setter;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -35,7 +37,7 @@ public class Workout {
     @JoinColumn(name = "student_id", nullable = false)
     private User student;
 
-    @OneToMany(mappedBy = "tb_workout", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WorkoutExercise> exercises = new ArrayList<>();
 
     private int totalDuration;
@@ -63,7 +65,7 @@ public class Workout {
 
     @PrePersist
     @PreUpdate
-    private void calculateTotalDuration() {
+    public void calculateTotalDuration() {
         this.totalDuration = exercises.stream()
                 .mapToInt(WorkoutExercise::getTotalDuration)
                 .sum();

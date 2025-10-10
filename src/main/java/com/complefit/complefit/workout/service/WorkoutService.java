@@ -8,11 +8,14 @@ import com.complefit.complefit.workout.domain.Workout;
 import com.complefit.complefit.workout.domain.WorkoutVisibility;
 import com.complefit.complefit.workout.dto.WorkoutRequestDTO;
 import com.complefit.complefit.workout.dto.WorkoutResponseDTO;
-import com.complefit.complefit.workout.dto.WorkoutUpdateRequestDTO;
+import com.complefit.complefit.workout.dto.WorkoutUpdateDTO;
+import com.complefit.complefit.workout.exception.WorkoutException;
 import com.complefit.complefit.workout.mapper.WorkoutMapper;
 import com.complefit.complefit.workout.repository.WorkoutRepository;
-import jakarta.transaction.Transactional;
+import com.complefit.complefit.workoutexercise.domain.WorkoutExercise;
+import com.complefit.complefit.workoutexercise.mapper.WorkoutExerciseMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -23,15 +26,17 @@ public class WorkoutService {
     private final WorkoutRepository workoutRepository;
     private final UserRepository userRepository;
     private final WorkoutMapper workoutMapper;
+    private final WorkoutExerciseMapper workoutExerciseMapper;
 
     public WorkoutService(
             WorkoutRepository workoutRepository,
             UserRepository userRepository,
-            WorkoutMapper workoutMapper
+            WorkoutMapper workoutMapper, WorkoutExerciseMapper workoutExerciseMapper
     ) {
         this.workoutRepository = workoutRepository;
         this.userRepository = userRepository;
         this.workoutMapper = workoutMapper;
+        this.workoutExerciseMapper = workoutExerciseMapper;
     }
 
     @Transactional
@@ -49,21 +54,21 @@ public class WorkoutService {
         Workout workout = workoutMapper.toEntity(request, trainer, student);
         workoutRepository.save(workout);
 
-        return WorkoutResponseDTO.fromEntity(workout);
+        return workoutMapper.toResponse(workout);
     }
 
     @Transactional(readOnly = true)
     public WorkoutResponseDTO getById(UUID id) {
         Workout workout = workoutRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Workout not found"));
-        return WorkoutResponseDTO.fromEntity(workout);
+        return workoutMapper.toResponse(workout);
     }
 
     @Transactional(readOnly = true)
     public List<WorkoutResponseDTO> getByTrainer(UUID trainerId) {
         return workoutRepository.findByTrainerId(trainerId)
                 .stream()
-                .map(WorkoutResponseDTO::fromEntity)
+                .map(workoutMapper::toResponse)
                 .toList();
     }
 
@@ -71,12 +76,12 @@ public class WorkoutService {
     public List<WorkoutResponseDTO> getByStudent(UUID studentId) {
         return workoutRepository.findByStudentId(studentId)
                 .stream()
-                .map(WorkoutResponseDTO::fromEntity)
+                .map(workoutMapper::toResponse)
                 .toList();
     }
 
     @Transactional
-    public WorkoutResponseDTO update(UUID id, WorkoutUpdateRequestDTO request) {
+    public WorkoutResponseDTO update(UUID id, WorkoutUpdateDTO request) {
         Workout workout = workoutRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Workout not found"));
 
@@ -87,22 +92,20 @@ public class WorkoutService {
             workout.setVisibility(WorkoutVisibility.valueOf(request.visibility()));
 
         if (request.exercises() != null && !request.exercises().isEmpty()) {
-            List<WorkoutExercise> updatedExercises = request.exercises().stream()
-                    .map(dto -> new WorkoutExerciseMapper().toEntity(dto))
-                    .toList();
+            List<WorkoutExercise> updatedExercises = workoutExerciseMapper.toEntityList(request.exercises());
             workout.getExercises().clear();
             workout.getExercises().addAll(updatedExercises);
         }
 
         workoutRepository.save(workout);
 
-        return WorkoutResponseDTO.fromEntity(workout);
+        return workoutMapper.toResponse(workout);
     }
 
     @Transactional
     public void delete(UUID id) {
         if (!workoutRepository.existsById(id)) {
-            throw new IllegalArgumentException("Workout not found");
+            throw WorkoutException.notFound(id);
         }
         workoutRepository.deleteById(id);
     }

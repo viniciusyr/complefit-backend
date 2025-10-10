@@ -1,5 +1,6 @@
 package com.complefit.complefit.workout.dto;
 
+import com.complefit.complefit.workoutexercise.dto.WorkoutExerciseRequestDTO;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 
@@ -16,5 +17,10 @@ public record WorkoutUpdateDTO(
         List<WorkoutExerciseRequestDTO> exercises,
 
         @PositiveOrZero(message = "Total duration must be zero or positive")
-        Integer totalDurationSeconds
+        Integer totalDurationSeconds,
+
+        @Size(max = 100, message = "Description must be at most 500 characters long")
+        String notes,
+
+        String visibility
 ) {}
