@@ -2,7 +2,7 @@ package com.complefit.complefit.workout.controller;
 
 import com.complefit.complefit.workout.dto.WorkoutRequestDTO;
 import com.complefit.complefit.workout.dto.WorkoutResponseDTO;
-import com.complefit.complefit.workout.dto.WorkoutUpdateRequestDTO;
+import com.complefit.complefit.workout.dto.WorkoutUpdateDTO;
 import com.complefit.complefit.workout.service.WorkoutService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +46,7 @@ public class WorkoutController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<WorkoutResponseDTO> update(@PathVariable UUID id, @Valid @RequestBody WorkoutUpdateRequestDTO request) {
+    public ResponseEntity<WorkoutResponseDTO> update(@PathVariable UUID id, @Valid @RequestBody WorkoutUpdateDTO request) {
         WorkoutResponseDTO response = workoutService.update(id, request);
         return ResponseEntity.ok(response);
     }

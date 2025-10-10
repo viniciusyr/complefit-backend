@@ -5,11 +5,13 @@ import com.complefit.complefit.workout.domain.Workout;
 import com.complefit.complefit.workout.domain.WorkoutVisibility;
 import com.complefit.complefit.workout.dto.WorkoutRequestDTO;
 import com.complefit.complefit.workout.dto.WorkoutResponseDTO;
-import com.complefit.complefit.workout.dto.WorkoutUpdateRequestDTO;
+import com.complefit.complefit.workout.dto.WorkoutUpdateDTO;
+import com.complefit.complefit.workoutexercise.domain.WorkoutExercise;
+import com.complefit.complefit.workoutexercise.mapper.WorkoutExerciseMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
+import java.util.List;
 
 @Component
 public class WorkoutMapper {
@@ -22,9 +24,7 @@ public class WorkoutMapper {
     }
 
     public Workout toEntity(WorkoutRequestDTO request, User trainer, User student) {
-        List<WorkoutExercise> exercises = request.exercises().stream()
-                .map(exerciseMapper::toEntity)
-                .toList();
+        List<WorkoutExercise> exercises = exerciseMapper.toEntityList(request.exercises());
 
         return new Workout(
                 request.title(),
@@ -37,7 +37,7 @@ public class WorkoutMapper {
         );
     }
 
-    public void updateEntity(Workout workout, WorkoutUpdateRequestDTO request) {
+    public void updateEntity(Workout workout, WorkoutUpdateDTO request) {
         if (request.title() != null) workout.setTitle(request.title());
         if (request.description() != null) workout.setDescription(request.description());
         if (request.notes() != null) workout.setNotes(request.notes());
@@ -59,14 +59,16 @@ public class WorkoutMapper {
                 workout.getId(),
                 workout.getTitle(),
                 workout.getDescription(),
-                workout.getNotes(),
-                workout.getVisibility().name(),
                 workout.getTrainer() != null ? workout.getTrainer().getId() : null,
-                workout.getStudent() != null ? workout.getStudent().getId() : null,
+                workout.getTrainer() != null ? workout.getTrainer().getFirstName() + " " + workout.getTrainer().getLastName()  : null,
+                workout.getStudent().getId(),
+                workout.getStudent().getFirstName() + " " + workout.getStudent().getLastName(),
+                workout.getVisibility().name(),
                 workout.getExercises().stream()
                         .map(exerciseMapper::toResponse)
                         .toList(),
                 workout.getTotalDuration(),
+                workout.getNotes(),
                 workout.getCreatedAt(),
                 workout.getUpdatedAt()
         );
