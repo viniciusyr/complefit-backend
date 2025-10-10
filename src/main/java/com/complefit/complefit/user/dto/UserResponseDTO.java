@@ -8,12 +8,13 @@ import java.util.UUID;
 
 public record UserResponseDTO(
 
-        @NotNull UUID id,
+        UUID id,
         String firstName,
         String lastName,
         String email,
         String phoneNumber,
         LocalDate birthDate,
+        String cpf,
         String gender,
         Double height,
         Double weight,

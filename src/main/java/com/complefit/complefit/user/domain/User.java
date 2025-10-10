@@ -38,6 +38,9 @@ public class User implements UserDetails {
     private String phoneNumber;
     private LocalDate birthDate;
 
+    @Column(unique = true, nullable = false, length = 11)
+    private String cpf;
+
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
@@ -68,7 +71,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return "";
+        return this.email;
     }
 
     @Override

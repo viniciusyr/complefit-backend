@@ -6,11 +6,8 @@ import com.complefit.complefit.user.domain.UserRole;
 import com.complefit.complefit.user.dto.UserRequestDTO;
 import com.complefit.complefit.user.dto.UserResponseDTO;
 import com.complefit.complefit.user.dto.UserUpdateDTO;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class UserMapper {
-
-    private static final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public static User toEntity(UserRequestDTO dto) {
         User user = new User();
@@ -20,6 +17,7 @@ public class UserMapper {
         user.setPasswordHash(dto.password());
         user.setPhoneNumber(dto.phoneNumber());
         user.setBirthDate(dto.birthDate());
+        user.setCpf(dto.cpf());
         user.setGender(dto.gender());
         user.setHeight(dto.height());
         user.setWeight(dto.weight());
@@ -32,6 +30,7 @@ public class UserMapper {
         if (dto.lastName() != null) user.setLastName(dto.lastName());
         if (dto.phoneNumber() != null) user.setPhoneNumber(dto.phoneNumber());
         if (dto.birthDate() != null) user.setBirthDate(dto.birthDate());
+        if (dto.cpf() != null) user.setCpf(dto.cpf());
         if (dto.gender() != null) user.setGender(Gender.valueOf(dto.gender()));
         if (dto.height() != null) user.setHeight(dto.height());
         if (dto.weight() != null) user.setWeight(dto.weight());
@@ -45,6 +44,7 @@ public class UserMapper {
                 user.getEmail(),
                 user.getPhoneNumber(),
                 user.getBirthDate(),
+                user.getCpf(),
                 user.getGender().name(),
                 user.getHeight(),
                 user.getWeight(),
