@@ -7,6 +7,8 @@ import com.complefit.complefit.user.dto.UserRequestDTO;
 import com.complefit.complefit.user.dto.UserResponseDTO;
 import com.complefit.complefit.user.dto.UserUpdateDTO;
 
+import java.time.Instant;
+
 public class UserMapper {
 
     public static User toEntity(UserRequestDTO dto) {
@@ -22,6 +24,7 @@ public class UserMapper {
         user.setHeight(dto.height());
         user.setWeight(dto.weight());
         user.setRole(UserRole.USER);
+        user.setCreatedAt(Instant.now());
         return user;
     }
 
@@ -48,7 +51,9 @@ public class UserMapper {
                 user.getGender().name(),
                 user.getHeight(),
                 user.getWeight(),
-                user.getRole()
+                user.getRole(),
+                user.getCreatedAt(),
+                user.getUpdatedAt()
         );
     }
 }
