@@ -6,6 +6,7 @@ CREATE TABLE tb_users (
     password_hash VARCHAR(255),
     phone_number VARCHAR(50),
     birth_date DATE,
+    cpf VARCHAR(11) UNIQUE NOT NULL,
     gender VARCHAR(20),
     height NUMERIC(5,2),
     weight NUMERIC(5,2),

@@ -3,6 +3,7 @@ package com.complefit.complefit.user.dto;
 import com.complefit.complefit.user.domain.UserRole;
 import jakarta.validation.constraints.NotNull;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -18,6 +19,8 @@ public record UserResponseDTO(
         String gender,
         Double height,
         Double weight,
-        UserRole role
+        UserRole role,
+        Instant createdAt,
+        Instant updatedAt
 
 ) {}
