@@ -9,11 +9,7 @@
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>
-                %clr(%d{HH:mm:ss.SSS}){faint} |
-                %clr(%-5level) |
-                %clr(${APP_NAME:-application}){cyan} |
-                %clr(%logger{36}){faint} :
-                %msg%n%wEx
+                %clr(%d{HH:mm:ss.SSS}){faint} %clr(%-5level) %clr(${APP_NAME:-application}){cyan} | %clr(%logger{36}){faint} : %msg%n%wEx
             </pattern>
             <charset>UTF-8</charset>
         </encoder>
