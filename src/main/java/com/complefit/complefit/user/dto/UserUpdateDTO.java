@@ -2,18 +2,16 @@ package com.complefit.complefit.user.dto;
 
 
 
-import jakarta.validation.constraints.Past;
-
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
 
 public record UserUpdateDTO(
+        @NotBlank
         @Size(min = 2, max = 50)
         String firstName,
 
+        @NotBlank
         @Size(min = 2, max = 50)
         String lastName,
 
@@ -26,6 +24,7 @@ public record UserUpdateDTO(
         @Positive(message = "Weight must be positive")
         Double weight,
 
+        @NotBlank
         String gender,
 
         @Past(message = "Birth date must be in the past")
