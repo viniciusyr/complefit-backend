@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,6 +22,8 @@ import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.List;
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfiguration {
@@ -28,8 +31,7 @@ public class SecurityConfiguration {
     private final AuthService authService;
 
     public SecurityConfiguration(AuthService authService) {
-        this.authService = authService;
-    }
+        this.authService = authService;}
 
     @Bean
     public SecurityFilterChain securityFilterChain(
@@ -39,13 +41,7 @@ public class SecurityConfiguration {
 
         return http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(request -> {
-                    CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(List.of("http://localhost:8090"));
-                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "OPTIONS"));
-                    config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-                    return config;
-                }))
+                .cors(withDefaults -> {})
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
