@@ -3,15 +3,18 @@ package com.complefit.complefit.auth.service;
 import com.complefit.complefit.auth.domain.AuthToken;
 import com.complefit.complefit.auth.dto.AuthResponseDTO;
 import com.complefit.complefit.auth.exception.AuthException;
+import com.complefit.complefit.auth.mapper.AuthMapper;
 import com.complefit.complefit.auth.repository.AuthTokenRepository;
 import com.complefit.complefit.user.domain.User;
 import com.complefit.complefit.user.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class AuthService {
 
@@ -57,7 +60,9 @@ public class AuthService {
 
         authTokenRepository.save(authToken);
 
-        return new AuthResponseDTO(accessToken, refreshToken);
+        log.info("User logged with token: {}", accessToken);
+
+        return AuthMapper.toAuthResponse(accessToken, refreshToken, user);
     }
 
     public AuthResponseDTO refresh(String refreshToken) {
@@ -78,7 +83,7 @@ public class AuthService {
             throw AuthException.tokenGenerationException(null);
         }
 
-        return new AuthResponseDTO(newAccessToken, refreshToken);
+        return AuthMapper.toAuthResponse(newAccessToken, refreshToken, user);
     }
 
 
