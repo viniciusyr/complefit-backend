@@ -7,12 +7,14 @@ import com.complefit.complefit.auth.mapper.AuthMapper;
 import com.complefit.complefit.auth.repository.AuthTokenRepository;
 import com.complefit.complefit.user.domain.User;
 import com.complefit.complefit.user.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class AuthService {
 
@@ -57,6 +59,8 @@ public class AuthService {
         authToken.setExpiryDate(LocalDateTime.now().plusDays(7));
 
         authTokenRepository.save(authToken);
+
+        log.info("User logged with token: {}", accessToken);
 
         return AuthMapper.toAuthResponse(accessToken, refreshToken, user);
     }
