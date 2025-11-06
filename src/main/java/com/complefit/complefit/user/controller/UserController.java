@@ -1,5 +1,6 @@
 package com.complefit.complefit.user.controller;
 
+import com.complefit.complefit.user.domain.User;
 import com.complefit.complefit.user.dto.UserRequestDTO;
 import com.complefit.complefit.user.dto.UserResponseDTO;
 import com.complefit.complefit.user.dto.UserUpdateDTO;
@@ -7,6 +8,7 @@ import com.complefit.complefit.user.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,6 +33,12 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> getUserById(@PathVariable UUID id) {
         UserResponseDTO userResponseDTO = userService.getUserById(id);
+        return ResponseEntity.ok(userResponseDTO);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponseDTO> getProfile(@AuthenticationPrincipal User user){
+        UserResponseDTO userResponseDTO = userService.getAuthenticatedUserProfile(user);
         return ResponseEntity.ok(userResponseDTO);
     }
 
