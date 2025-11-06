@@ -42,6 +42,13 @@ public class UserService {
         return UserMapper.toResponse(user);
     }
 
+    public UserResponseDTO getAuthenticatedUserProfile(User authenticatedUser){
+        User user = userRepository.findById(authenticatedUser.getId())
+                .orElseThrow(() -> UserException.notFound(authenticatedUser));
+
+        return UserMapper.toResponse(user);
+    }
+
     public UserResponseDTO getUserById(UUID id) {
          User user = userRepository.findById(id).orElseThrow(() -> UserException.notFound(id));
          return UserMapper.toResponse(user);
