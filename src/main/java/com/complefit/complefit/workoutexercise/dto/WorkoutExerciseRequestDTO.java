@@ -7,6 +7,8 @@ import jakarta.validation.constraints.NotNull;
 
 public record WorkoutExerciseRequestDTO(
 
+        String exerciseId, // Optional: ID from ExerciseDB API
+
         @NotBlank
         String exerciseName,
 
@@ -20,12 +22,12 @@ public record WorkoutExerciseRequestDTO(
         @NotNull @Min(1)
         Integer repetitions,
 
-        @Min(1)
+        @Min(0)
         Double weight,
 
-        @Min(1)
+        @Min(0)
         Integer restTimeSeconds,
 
-        @Min(1)
+        @Min(0)
         Integer durationSeconds
 ) {}

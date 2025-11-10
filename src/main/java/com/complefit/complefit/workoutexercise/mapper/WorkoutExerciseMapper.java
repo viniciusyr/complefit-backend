@@ -16,6 +16,7 @@ public class WorkoutExerciseMapper {
         if (dto == null) return null;
 
         return WorkoutExercise.builder()
+                .exerciseId(dto.exerciseId())
                 .exerciseName(dto.exerciseName())
                 .description(dto.description())
                 .videoUrl(dto.videoUrl())
