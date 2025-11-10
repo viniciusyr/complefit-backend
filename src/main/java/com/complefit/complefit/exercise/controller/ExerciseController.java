@@ -1,18 +1,18 @@
 package com.complefit.complefit.exercise.controller;
 
-import com.complefit.complefit.exercise.dto.ExerciseDTO;
+import com.complefit.complefit.exercise.dto.ExerciseRequestDTO;
+import com.complefit.complefit.exercise.dto.ExerciseResponseDTO;
+import com.complefit.complefit.exercise.dto.ExerciseUpdateDTO;
 import com.complefit.complefit.exercise.service.ExerciseService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/exercises")
-@Tag(name = "Exercises", description = "Exercise database operations from ExerciseDB API")
 public class ExerciseController {
 
     private final ExerciseService exerciseService;
@@ -21,58 +21,57 @@ public class ExerciseController {
         this.exerciseService = exerciseService;
     }
 
-    @GetMapping
-    @Operation(summary = "Get all exercises with pagination")
-    public ResponseEntity<List<ExerciseDTO>> getAll(
-            @Parameter(description = "Maximum number of results") @RequestParam(defaultValue = "20") int limit,
-            @Parameter(description = "Number of results to skip") @RequestParam(defaultValue = "0") int offset
-    ) {
-        return ResponseEntity.ok(exerciseService.getAll(limit, offset));
+    @PostMapping
+    public ResponseEntity<ExerciseResponseDTO> create(@Valid @RequestBody ExerciseRequestDTO dto) {
+        return ResponseEntity.ok(exerciseService.createExercise(dto));
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get exercise by ID")
-    public ResponseEntity<ExerciseDTO> getById(@PathVariable String id) {
-        return ResponseEntity.ok(exerciseService.getById(id));
+    public ResponseEntity<ExerciseResponseDTO> getById(@PathVariable UUID id) {
+        return ResponseEntity.ok(exerciseService.getExerciseById(id));
     }
 
-    @GetMapping("/search/name/{name}")
-    @Operation(summary = "Search exercises by name")
-    public ResponseEntity<List<ExerciseDTO>> searchByName(
-            @PathVariable String name,
-            @RequestParam(defaultValue = "20") int limit,
-            @RequestParam(defaultValue = "0") int offset
-    ) {
-        return ResponseEntity.ok(exerciseService.searchByName(name, limit, offset));
+    @GetMapping
+    public ResponseEntity<List<ExerciseResponseDTO>> getAll() {
+        return ResponseEntity.ok(exerciseService.getAllExercises());
     }
 
-    @GetMapping("/search/target/{target}")
-    @Operation(summary = "Search exercises by target muscle", description = "Example: glutes, biceps, triceps")
-    public ResponseEntity<List<ExerciseDTO>> searchByTarget(
-            @PathVariable String target,
-            @RequestParam(defaultValue = "20") int limit,
-            @RequestParam(defaultValue = "0") int offset
-    ) {
-        return ResponseEntity.ok(exerciseService.searchByTarget(target, limit, offset));
+    @GetMapping("/search")
+    public ResponseEntity<List<ExerciseResponseDTO>> search(@RequestParam String name) {
+        return ResponseEntity.ok(exerciseService.searchByName(name));
     }
 
-    @GetMapping("/search/bodypart/{bodyPart}")
-    @Operation(summary = "Search exercises by body part", description = "Example: back, chest, legs")
-    public ResponseEntity<List<ExerciseDTO>> searchByBodyPart(
-            @PathVariable String bodyPart,
-            @RequestParam(defaultValue = "20") int limit,
-            @RequestParam(defaultValue = "0") int offset
-    ) {
-        return ResponseEntity.ok(exerciseService.searchByBodyPart(bodyPart, limit, offset));
+    @GetMapping("/category/{category}")
+    public ResponseEntity<List<ExerciseResponseDTO>> getByCategory(@PathVariable String category) {
+        return ResponseEntity.ok(exerciseService.getByCategory(category));
     }
 
-    @GetMapping("/search/equipment/{equipment}")
-    @Operation(summary = "Search exercises by equipment", description = "Example: dumbbell, barbell, cable, bodyweight")
-    public ResponseEntity<List<ExerciseDTO>> searchByEquipment(
-            @PathVariable String equipment,
-            @RequestParam(defaultValue = "20") int limit,
-            @RequestParam(defaultValue = "0") int offset
+    @GetMapping("/muscle/{muscleGroup}")
+    public ResponseEntity<List<ExerciseResponseDTO>> getByMuscleGroup(@PathVariable String muscleGroup) {
+        return ResponseEntity.ok(exerciseService.getByMuscleGroup(muscleGroup));
+    }
+
+    @GetMapping("/equipment/{equipment}")
+    public ResponseEntity<List<ExerciseResponseDTO>> getByEquipment(@PathVariable String equipment) {
+        return ResponseEntity.ok(exerciseService.getByEquipment(equipment));
+    }
+
+    @GetMapping("/difficulty/{difficulty}")
+    public ResponseEntity<List<ExerciseResponseDTO>> getByDifficulty(@PathVariable String difficulty) {
+        return ResponseEntity.ok(exerciseService.getByDifficulty(difficulty));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ExerciseResponseDTO> update(
+            @PathVariable UUID id,
+            @Valid @RequestBody ExerciseUpdateDTO dto
     ) {
-        return ResponseEntity.ok(exerciseService.searchByEquipment(equipment, limit, offset));
+        return ResponseEntity.ok(exerciseService.updateExercise(id, dto));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        exerciseService.deleteExercise(id);
+        return ResponseEntity.noContent().build();
     }
 }

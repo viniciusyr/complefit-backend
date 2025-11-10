@@ -12,7 +12,7 @@ This is a **Spring Boot 3.5.6** fitness management application using **Java 25**
 
 ## Module Organization Pattern
 
-Every domain module follows this strict structure (see `student/`, `trainer/`, `auth/`, `exercise/`, etc.):
+Every domain module follows this strict structure (see `student/`, `trainer/`, `auth/`, etc.):
 ```
 domain/           # JPA entities with Lombok (@Entity, @Getter, @Setter, @NoArgsConstructor, @AllArgsConstructor)
 dto/              # Java records for Request/Response/Update DTOs with Jakarta validation
@@ -21,12 +21,9 @@ repository/       # JpaRepository interfaces
 service/          # Business logic with constructor injection
 controller/       # REST controllers at /api/{module}, constructor injection
 exception/        # Module-specific exceptions extending GlobalException
-config/           # Module-specific configuration (optional, e.g., ExerciseDbConfig)
 ```
 
 **Example:** `StudentService` depends on `StudentRepository` AND `UserRepository` because students require user lookup.
-
-**Note:** The `exercise` module does NOT have domain/repository as it's a proxy to ExerciseDB API (no local storage).
 
 ## Critical Conventions
 
@@ -71,7 +68,6 @@ Located in `infra/config/security/`:
 - **RateLimitFilter**: Uses Bucket4j for rate limiting (runs before JWT filter)
 - **SecurityConfiguration**: 
   - Public: `/api/auth/**`, `/api/users/register`, Swagger UI, health endpoint
-  - Authenticated: `/api/exercises/**` (search exercises from ExerciseDB)
   - All other `/api/**` requires authentication
 - **TokenService**: Uses Auth0 JWT library with HMAC256, stores role in claims
 
@@ -87,10 +83,7 @@ Located in `infra/config/security/`:
 
 ### Local Setup
 1. Run `docker-compose up -d` (starts PostgreSQL on `${POSTGRES_PORT}` + pgAdmin)
-2. Set environment variables in `.env` or IDE: 
-   - Database: `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `POSTGRES_PORT`
-   - Auth: `JWT_SECRET`
-   - ExerciseDB: `EXERCISEDB_API_KEY` (get from https://rapidapi.com/justin-WFnsXH_t6/api/exercisedb)
+2. Set environment variables in `.env` or IDE: `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `POSTGRES_PORT`, `JWT_SECRET`
 3. Spring profile: `spring.profiles.active=local` (loads `application-local.yml`)
 4. Application runs on port **8090** (`server.port: 8090`)
 
@@ -114,36 +107,6 @@ Located in `infra/config/security/`:
 - Swagger endpoints are public (no auth required)
 
 ## Common Patterns
-
-### External API Integration (ExerciseDB)
-```java
-// WebClient configuration with headers
-@Bean
-public WebClient exerciseDbWebClient() {
-    return WebClient.builder()
-            .baseUrl(apiUrl)
-            .defaultHeader("X-RapidAPI-Key", apiKey)
-            .build();
-}
-
-// Reactive API call with error handling
-webClient.get()
-    .uri("/exercises/name/{name}", name)
-    .retrieve()
-    .bodyToFlux(ExerciseDTO.class)
-    .onErrorResume(WebClientResponseException.class, this::handleApiError)
-    .block();
-```
-
-### Auto-populating from External Data
-```java
-// WorkoutExerciseService: If exerciseId provided, fetch from ExerciseDB
-if (dto.exerciseId() != null && !dto.exerciseId().isBlank()) {
-    ExerciseDTO data = exerciseService.getById(dto.exerciseId());
-    entity.setExerciseName(data.name());
-    entity.setDescription(String.join(". ", data.instructions()));
-}
-```
 
 ### Entity Relationships
 ```java
@@ -175,5 +138,3 @@ if (dto.goal() != null) student.setGoal(dto.goal());
 - **User Model**: `user/domain/User.java` (implements `UserDetails`)
 - **Migration Template**: `db/migration/V1__initial_schema.sql`
 - **Test Template**: `test/.../user/controller/UserControllerTest.java`
-- **External API Integration**: `exercise/service/ExerciseService.java`, `exercise/config/ExerciseDbConfig.java`
-- **ExerciseDB Integration Guide**: `EXERCISEDB_INTEGRATION.md`

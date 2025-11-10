@@ -1,7 +1,5 @@
 package com.complefit.complefit.workoutexercise.service;
 
-import com.complefit.complefit.exercise.dto.ExerciseDTO;
-import com.complefit.complefit.exercise.service.ExerciseService;
 import com.complefit.complefit.workoutexercise.dto.WorkoutExerciseRequestDTO;
 import com.complefit.complefit.workoutexercise.dto.WorkoutExerciseResponseDTO;
 import com.complefit.complefit.workoutexercise.dto.WorkoutExerciseUpdateRequestDTO;
@@ -18,30 +16,17 @@ public class WorkoutExerciseService {
 
     private final WorkoutExerciseRepository repository;
     private final WorkoutExerciseMapper mapper;
-    private final ExerciseService exerciseService;
 
     public WorkoutExerciseService(
             WorkoutExerciseRepository repository, 
-            WorkoutExerciseMapper mapper,
-            ExerciseService exerciseService) {
+            WorkoutExerciseMapper mapper) {
         this.repository = repository;
         this.mapper = mapper;
-        this.exerciseService = exerciseService;
     }
 
     @Transactional
     public WorkoutExerciseResponseDTO create(WorkoutExerciseRequestDTO dto) {
         var entity = mapper.toEntity(dto);
-        
-        // If exerciseId is provided, fetch details from ExerciseDB
-        if (dto.exerciseId() != null && !dto.exerciseId().isBlank()) {
-            ExerciseDTO exerciseData = exerciseService.getById(dto.exerciseId());
-            entity.setExerciseId(exerciseData.id());
-            entity.setExerciseName(exerciseData.name());
-            entity.setDescription(String.join(". ", exerciseData.instructions()));
-            entity.setVideoUrl(exerciseData.gifUrl());
-        }
-        
         entity.getTotalDuration();
         var saved = repository.save(entity);
         return mapper.toResponse(saved);

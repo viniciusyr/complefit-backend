@@ -35,9 +35,4 @@ management:
       roles: ADMIN
       show-details: when_authorized
 
-exercisedb:
-  api-url: https://exercisedb.p.rapidapi.com
-  api-key: ${EXERCISEDB_API_KEY:}
-  api-host: exercisedb.p.rapidapi.com
-
 
